@@ -1,0 +1,40 @@
+name: github actions workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Repository letöltése
+        uses: actions/checkout@v4
+
+      - name: Bejelentkezés GHCR-be
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Backend Docker image build
+        run: docker build -t ghcr.io/gg5zl7/alkfejl_projekt/backend:latest ./backend
+
+      - name: Backend Docker image push
+        run: docker push ghcr.io/gg5zl7/alkfejl_projekt/backend:latest
+
+      - name: Frontend Docker image build
+        run: docker build -t ghcr.io/gg5zl7/alkfejl_projekt/frontend:latest ./frontend
+
+      - name: Frontend Docker image push
+        run: docker push ghcr.io/gg5zl7/alkfejl_projekt/frontend:latest
